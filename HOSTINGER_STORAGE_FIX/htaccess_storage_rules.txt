@@ -1,0 +1,20 @@
+# قواعد .htaccess لإضافة storage إلى ملف .htaccess الموجود في public_html
+
+# أضف هذه القواعد في بداية ملف .htaccess (بعد RewriteEngine On)
+
+# Handle storage files FIRST - highest priority
+# This ensures /storage/* requests are handled correctly on shared hosting
+RewriteCond %{REQUEST_URI} ^/storage/(.+)$ [NC]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/storage/index.php -f
+RewriteRule ^storage/(.+)$ storage/index.php?file=$1 [L,QSA]
+
+# Fallback: route to Laravel if storage/index.php doesn't exist
+RewriteCond %{REQUEST_URI} ^/storage/(.+)$ [NC]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{DOCUMENT_ROOT}/storage/index.php !-f
+RewriteRule ^storage/(.+)$ index.php [L,QSA]
+
+# ملاحظة: تأكد من أن هذه القواعد قبل قواعد Laravel الأخرى
+

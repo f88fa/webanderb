@@ -1,0 +1,134 @@
+# ============================================
+# أوامر SSH/SCP لرفع الملفات المحدثة
+# ============================================
+
+# ============================================
+# الطريقة الأولى: استخدام SCP (ملف واحد في كل مرة)
+# ============================================
+
+# استبدل المعلومات التالية:
+# - your-server.com: عنوان الخادم
+# - your-username: اسم المستخدم SSH
+# - /path/to/project: المسار الكامل للمشروع على الخادم
+# - 22: منفذ SSH (افتراضي: 22)
+
+# رفع ملف SettingsController.php
+scp -P 22 app/Http/Controllers/SettingsController.php your-username@your-server.com:/path/to/project/app/Http/Controllers/
+
+# رفع ملف settings.blade.php
+scp -P 22 resources/views/dashboard/pages/settings.blade.php your-username@your-server.com:/path/to/project/resources/views/dashboard/pages/
+
+# رفع ملف index.blade.php (frontend)
+scp -P 22 resources/views/frontend/index.blade.php your-username@your-server.com:/path/to/project/resources/views/frontend/
+
+# رفع ملف frontend.css
+scp -P 22 public/assets/css/frontend.css your-username@your-server.com:/path/to/project/public/assets/css/
+
+# رفع ملف web.php
+scp -P 22 routes/web.php your-username@your-server.com:/path/to/project/routes/
+
+# ============================================
+# الطريقة الثانية: استخدام SCP (جميع الملفات في أمر واحد)
+# ============================================
+
+scp -P 22 \
+    app/Http/Controllers/SettingsController.php \
+    resources/views/dashboard/pages/settings.blade.php \
+    resources/views/frontend/index.blade.php \
+    public/assets/css/frontend.css \
+    routes/web.php \
+    your-username@your-server.com:/path/to/project/
+
+# ملاحظة: هذه الطريقة ترفع جميع الملفات إلى المجلد الرئيسي
+# ستحتاج بعدها إلى نقل كل ملف إلى موقعه الصحيح
+
+# ============================================
+# الطريقة الثالثة: استخدام RSYNC (الأفضل والأسرع)
+# ============================================
+
+# رفع جميع الملفات مع الحفاظ على البنية المجلدات
+rsync -avz -e "ssh -p 22" \
+    app/Http/Controllers/SettingsController.php \
+    resources/views/dashboard/pages/settings.blade.php \
+    resources/views/frontend/index.blade.php \
+    public/assets/css/frontend.css \
+    routes/web.php \
+    your-username@your-server.com:/path/to/project/
+
+# ============================================
+# الطريقة الرابعة: استخدام RSYNC مع استثناءات
+# ============================================
+
+# رفع الملفات مع استثناء node_modules و vendor
+rsync -avz --exclude 'node_modules' --exclude 'vendor' --exclude '.git' \
+    -e "ssh -p 22" \
+    app/Http/Controllers/SettingsController.php \
+    resources/views/dashboard/pages/settings.blade.php \
+    resources/views/frontend/index.blade.php \
+    public/assets/css/frontend.css \
+    routes/web.php \
+    your-username@your-server.com:/path/to/project/
+
+# ============================================
+# الطريقة الخامسة: استخدام SSH مع tar (للملفات الكبيرة)
+# ============================================
+
+# ضغط الملفات محلياً ورفعها
+tar -czf updated_files.tar.gz \
+    app/Http/Controllers/SettingsController.php \
+    resources/views/dashboard/pages/settings.blade.php \
+    resources/views/frontend/index.blade.php \
+    public/assets/css/frontend.css \
+    routes/web.php
+
+# رفع الملف المضغوط
+scp -P 22 updated_files.tar.gz your-username@your-server.com:/tmp/
+
+# فك الضغط على الخادم
+ssh -p 22 your-username@your-server.com "cd /path/to/project && tar -xzf /tmp/updated_files.tar.gz && rm /tmp/updated_files.tar.gz"
+
+# حذف الملف المضغوط محلياً
+rm updated_files.tar.gz
+
+# ============================================
+# تنظيف الكاش بعد الرفع
+# ============================================
+
+# تنظيف كاش Laravel على الخادم
+ssh -p 22 your-username@your-server.com "cd /path/to/project && php artisan view:clear && php artisan config:clear && php artisan cache:clear"
+
+# ============================================
+# أمثلة عملية
+# ============================================
+
+# مثال 1: استضافة cPanel
+# scp -P 22 app/Http/Controllers/SettingsController.php username@example.com:/home/username/public_html/app/Http/Controllers/
+
+# مثال 2: استضافة DigitalOcean/Ubuntu
+# scp -P 22 app/Http/Controllers/SettingsController.php root@your-server-ip:/var/www/html/app/Http/Controllers/
+
+# مثال 3: استضافة AWS EC2 مع مفتاح SSH
+# scp -i /path/to/key.pem -P 22 app/Http/Controllers/SettingsController.php ubuntu@ec2-ip:/var/www/html/app/Http/Controllers/
+
+# ============================================
+# نصائح مهمة
+# ============================================
+
+# 1. تأكد من وجود صلاحيات الكتابة على المجلدات على الخادم
+# 2. احتفظ بنسخة احتياطية من الملفات قبل الرفع
+# 3. استخدم SSH keys بدلاً من كلمات المرور للأمان
+# 4. تحقق من وجود الملفات على الخادم بعد الرفع
+# 5. قم بتنظيف الكاش بعد الرفع
+
+# ============================================
+# إنشاء SSH Key (للمرة الأولى)
+# ============================================
+
+# إنشاء مفتاح SSH جديد
+# ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+# نسخ المفتاح إلى الخادم
+# ssh-copy-id -p 22 your-username@your-server.com
+
+# بعد ذلك يمكنك استخدام SSH بدون كلمة مرور
+

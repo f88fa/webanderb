@@ -7,6 +7,7 @@ use App\Models\Task;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema; // 1. أضفنا هذا السطر هنا
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Schema::defaultStringLength(191); // 2. أضفنا هذا السطر هنا لحل مشكلة الميغريشن
+
         // مزامنة الصلاحيات تلقائياً من config عند كل تشغيل للتطبيق
         try {
             \App\Services\PermissionsRegistry::sync();

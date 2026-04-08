@@ -7,7 +7,7 @@ use App\Models\Task;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema; // 1. أضفنا هذا السطر هنا
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,13 +27,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Schema::defaultStringLength(191); // 2. أضفنا هذا السطر هنا لحل مشكلة الميغريشن
+        Schema::defaultStringLength(191);
 
-        // مزامنة الصلاحيات تلقائياً من config عند كل تشغيل للتطبيق
-        try {
-            \App\Services\PermissionsRegistry::sync();
-        } catch (\Throwable $e) {
-            // تجاهل أثناء التنفيذ الأولي (مثلاً قبل تشغيل migrations)
+        // تعديل بسيط هنا: نتأكد أن التطبيق لا يحاول المزامنة أثناء تشغيل الأوامر البرمجية (مثل الاختبارات أو الميغريشن)
+        if (!app()->runningInConsole()) {
+            try {
+                \App\Services\PermissionsRegistry::sync();
+            } catch (\Throwable $e) {
+                // تجاهل أثناء التنفيذ الأولي
+            }
         }
 
         View::composer('wesal.index', function ($view) {

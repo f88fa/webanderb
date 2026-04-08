@@ -29,7 +29,6 @@ jobs:
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
     - name: Install Composer Dependencies
-      # هذا السطر تم تعديله لتجاوز أخطاء إصدارات المكتبات
       run: composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
     - name: Generate Key
@@ -43,7 +42,8 @@ jobs:
         DB_DATABASE: testing_db
         DB_USERNAME: root
         DB_PASSWORD: password
-      run: php artisan migrate --force
+      # لاحظ التعديل هنا: أضفنا :fresh لضمان مسح الجداول القديمة وبنائها من جديد
+      run: php artisan migrate:fresh --force
 
     - name: Run Tests
       run: php artisan test
